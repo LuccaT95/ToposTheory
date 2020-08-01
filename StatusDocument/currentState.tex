@@ -1,0 +1,157 @@
+\documentclass[a4paper, 11pt]{article}
+
+%basic
+\usepackage[utf8]{inputenc}
+
+% for handeling citations
+\usepackage[backend=biber, style=numeric, citestyle = numeric]{biblatex}  
+\addbibresource{bibFile.bib} 
+
+%for mathematics
+\usepackage{mathtools}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amssymb}
+
+% Mathematical environments
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{remark}[theorem]{Remark}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem*{observation}{Observation}
+\newtheorem{example}{Example}
+
+% category theory notation
+\newcommand{\cat}{%
+	\mathbf %
+}
+
+\newcommand{\domain}[ 1 ]{%
+	\mathrm{dom}(#1)%
+}
+
+\newcommand{\codomain}[ 1 ]{%
+	\mathrm{cod}(#1)%
+}
+
+\newcommand{\notion}[1]{\text{#1 }}
+
+\newcommand{\product}[5]{\notion{product} (#1 \, #2 \, #3 \, #4 \, #5)}
+\newcommand{\expon}[4]{\notion{exponential} (#1 \, #2 \, #3 \, #4)}
+
+\title{Category Theory in Free Logic}
+
+\author{Lucca Tiemens}
+
+\begin{document}
+
+\maketitle
+
+In this document I want to introduce the notions of a functor, a natural transformation, a cartesian category and a cartesian closed category in free logic. All of these are already implemented in Isabelle/HOL, though I have not proven facts about them. This summarizes my work done on the project during the last weeks. Also, I have almost finished the implementation of the category of sets as I believe this category to be important to have later on.
+
+Note that I will denote quantifiers that range only over existing elements by $\forall_f$ and $\exists_f$.
+
+\begin{definition}[Type]
+	A morphism $m$ is called a type if $\domain{m} \cong m$. 
+\end{definition}
+
+\begin{definition}[Functor]
+	Given two categories $\cat A$ and $\cat B$, a functor between $\cat A$ and $\cat B$, denoted by $F: \cat A \to \cat B$, is such that
+	\begin{enumerate}
+		\item $\forall x \in \cat A: E x \iff E (F x)$
+		\item $\forall x \in \cat A: \text{type } x \implies \text{type } (F x)$
+		\item $\forall x \in \cat A: F (\domain x) \cong \domain{F x}$
+		\item $\forall x, y \in \cat A: E(x\cdot y) \implies (F (x\cdot y) \cong (F x) \cdot (F y))$
+	\end{enumerate}
+\end{definition}
+
+\begin{definition}[Natural Transformation]
+	A natural transformation between two functors $F: \cat A \to \cat B$ and $G: \cat A \to \cat B$ consists of a map $\upsilon: \cat A \to \cat B$ such that
+	\[ \forall_f x \in \cat A: \upsilon (\codomain{x}) \cdot (F x) \simeq (G x) \cdot (\upsilon (\domain{x}))\]
+\end{definition}
+
+\begin{definition}[Category with binary products]
+	A category with binary products $\cat C$ is a category together with a map $\times: \cat C \times \cat C \to \cat C$ satisfying
+	\begin{enumerate}
+		\item $\forall_f x, y \in \cat C \, \exists_f p1, p2 \in \cat C: (\text{product } x \, y \, (x \times y) \, p1 \, p2)$
+		\item $E (x \times y) \implies (E x \wedge E y)$
+	\end{enumerate} 
+\end{definition}
+
+As you suggested, Dana, in this way the product is canonical by the map $\times$ that we specify.
+
+I adjusted the definition of a product a little bit because the definition of an exponential requires that we have the projection maps at hand. Therefore, the definition of a product now takes the two projection maps as the last two parameters.
+
+I have not introduced the maps fst and snd yet as I was not sure if it will be enough to specify their behavior by demanding $ \text{fst } (a \times b) \cong a$ and $\text{snd } (a \times b) \cong b$ because, if not applied to a product, fst and snd will return an arbitrary value.  
+
+\begin{definition}[Equalizer]
+	An equalizer in a category $\cat C$ between two parallel morphisms $f:A \to B$ and $g: A \to B$ is a morphism $e$ such that
+	\begin{enumerate}
+		\item $f \cdot e \simeq g \cdot e$
+		\item $\forall_f z \in \cat C: f \cdot z \simeq g \cdot z \implies \exists_f!u:A\to B\in \cat C: e \cdot u \simeq z$ 
+	\end{enumerate}
+	
+\end{definition}
+
+Question: Do you think it will be useful to introduce a function symbol for the equalizer?
+
+\begin{definition}[Cartesian Category]
+	A Cartesian category $\cat C$ is a category with binary products together with a type $\boldsymbol{1}$ such that
+	\begin{enumerate}
+		\item $\forall f:A\to B,g:A\to B \in \cat C: \exists e\in \cat C: (\text{equalizer } f \, g \, e)$
+		\item $\text{final } \boldsymbol{1}$
+	\end{enumerate}
+\end{definition}
+
+\begin{definition}[Exponential]
+	In a category with binary products we define
+	\begin{multline*}
+		\notion {exponential} a \, b \, c \, \epsilon :\iff 
+		\exists_f p1, p2 \in \cat C: \\ \product{a}{c}{\domain \epsilon}{ p1}{p2} \, \wedge \, \epsilon:(a\times c)\to b  \, \wedge \\
+		(\forall_f z, f \in \cat C : \exists_f q1,q2 \in \cat C: \product{z}{a}{\domain f}{q1}{q2} \wedge f:(z\times a)\to b \, \wedge \\
+		(\exists_f!\hat{f}:z\to c \in \cat C : (\exists_f!\mathtt{j}:\domain{f} \to \domain{\epsilon}: \\ p2 \cdot \mathtt{j} \simeq \hat{f} \cdot q1 \, \wedge \, p1 \cdot \mathtt{j} \simeq q2 \, \wedge \, \epsilon \cdot \mathtt{j} \simeq f)))
+	\end{multline*}
+\end{definition}
+
+I am convinced that the above definition is correct because I first derived it by my own, studying the usual definition of an exponential in diagram form and then I also found the above definition in Freyd and Scedrov's book \textit{Categories, Allegories} (tough of cause in their formalization but it is usable for us - so are all their definitions I have looked at so far by the way).
+
+By integrating the product map $\times$ into the definition of an exponential, I think we achieve a good canonical interplay between exponentials and products - thus we do not need to reason up to isomorphism so far. This should enable the definition of the product functor and the proof that exponentiation is functorial (I have not tried that yet).
+
+All of this allows the definition of a Cartesian Closed Category:
+
+\begin{definition}[Cartesian Closed Category]
+	A $CCC$ category $\cat C$ is a category with binary products and a map $exp : \cat C \times \cat C \to \cat C$ such that 
+	\begin{enumerate}
+		\item $\forall_f a,b \in \cat C: \exists_f \epsilon: \expon{a}{b}{(\notion{exp} a \, b)}{\epsilon}$
+		\item $E (\notion{exp} a \, b) \implies E \, a \, \wedge \, E \, b¸$
+	\end{enumerate}
+\end{definition}
+
+A Cartesian closed category as defined above is a Cartesian category. This is not proven yet in Isabelle/HOL. If we want to reason more about $CCC$'s it will probably be easier to introduce a second definition which has the final object in the signature.
+
+\medskip
+
+\noindent \textbf{General comments: } 
+
+The reason why I use Typeclasses in Isabelle/HOL at the moment is the fact that it makes writing down new definitions easier. In fact, I believe a Typeclass does not add any more expressive power but it is simply convenient to use. The advantage is that the presentation of the theory will later on be more readable and easier to follow. Furthermore, current Isabelle/HOL theories all try to use Typeclasses as far as I have experienced. So it is also \textit{modern} style in a sense.
+Of cause sledgehammer and ATP's might not work as good anymore. I believe the best way to handle this is to have a version which uses locales and a version that uses classes (the proofs should be very similar for both cases). Same goes for abbreviations versus definitions. In order to study how far ATP's can go, the locale version should be used and for presentation the class version should be used. Then one can also compare what the differences are.
+
+To give you an example for what I mean by more readable (and therefore also easier to use for exploration for new definitions) consider natural transformations between two functors.
+\begin{example}
+	If we use Typeclasses we can write down \[ \notion{naturalTransformation} \, \mathcal{F} \, \mathcal{G} \, \upsilon. \] The additional information that for example the domain of $\mathcal{F}$ is a category is stored in a Typeclass variable found in the definition of $\notion{isFunctor}$. 
+	
+	If we use Locales, the definition of a natural transformation explicitly needs the categories on which the functors are defined. So if we want to assume to have a natural transformation between $\mathcal{F}$ and $\mathcal{G}$, we need to write down
+	\[ naturalTransformation \, \mathcal{F} \, \mathcal{G} \, \upsilon \, dom_1 \, cod_1 \, \cdot_1 \, dom_2 \, cod_2 \, \cdot_2. \]
+\end{example}
+
+\noindent Do you have more thoughts on this, Christoph?
+
+\medskip
+
+\noindent The reason for using ZFC is quite simple: I want to have the category of sets. I do not know of another way to accomplish that without axiomatizing ZF for a new type. 
+
+\end{document}

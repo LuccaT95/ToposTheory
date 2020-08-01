@@ -1,0 +1,21 @@
+theory internalLanguage imports sledgeCategoryV3
+
+begin
+
+context topos begin
+
+\<comment> \<open>variable of type X: dom x\<close>
+\<comment> \<open>product of two maps \<sigma> and \<tau>: \<sigma>\<^bold>\<times>\<tau>\<close>
+
+abbreviation equality::"'a \<Rightarrow> 'a \<Rightarrow> 'a" (infix "\<^bold>=" 100)
+   where "\<sigma> \<^bold>= \<tau> \<equiv> (\<delta> (cod \<sigma>)) \<cdot> (\<sigma>\<^bold>\<times>\<tau>)"  
+
+lemma "cod (\<sigma> \<^bold>= \<tau>) \<cong> \<Omega>" sledgehammer(local.S3 local.S5 local.S6 local.cartesian2 local.cartesian3)
+  by (smt local.S3 local.S5 local.S6 local.cartesian2 local.cartesian3)
+
+
+lemma "type A" sledgehammer(local.S3 local.S5 local.S6 local.cartesian2 local.cartesian3)
+
+end
+
+end

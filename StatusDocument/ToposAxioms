@@ -1,0 +1,56 @@
+\documentclass[a4paper, 11pt]{article}
+
+%basic
+\usepackage[utf8]{inputenc}
+
+% for handeling citations
+\usepackage[backend=biber, style=numeric, citestyle = numeric]{biblatex}  
+\addbibresource{bibFile.bib} 
+
+%for mathematics
+\usepackage{mathtools}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amssymb}
+
+% Mathematical environments
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{remark}[theorem]{Remark}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem*{observation}{Observation}
+\newtheorem{example}{Example}
+
+% category theory notation
+\newcommand{\cat}{%
+	\mathbf %
+}
+
+\newcommand{\domain}[ 1 ]{%
+	\mathrm{dom}(#1)%
+}
+
+\newcommand{\codomain}[ 1 ]{%
+	\mathrm{cod}(#1)%
+}
+
+\newcommand{\notion}[1]{\text{#1 }}
+
+\newcommand{\product}[5]{\notion{product} (#1 \, #2 \, #3 \, #4 \, #5)}
+\newcommand{\expon}[4]{\notion{exponential} (#1 \, #2 \, #3 \, #4)}
+
+\title{Category Theory in Free Logic}
+
+\author{Lucca Tiemens}
+
+\begin{document}
+
+\maketitle
+
+Hello
+
+\end{document}

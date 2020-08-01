@@ -1,0 +1,38 @@
+theory BL imports Main
+
+begin
+
+typedecl a
+
+type_synonym i = "(a\<Rightarrow>bool)"
+
+consts impl:: "i \<Rightarrow> i => i" (infixr "\<^bold>\<rightarrow>" 49)
+consts con:: "i \<Rightarrow> i \<Rightarrow> i" (infixr "\<^bold>&" 50)
+
+
+axiomatization where
+  A1: "((\<phi> \<^bold>\<rightarrow> \<psi>) \<^bold>\<rightarrow> ((\<psi> \<^bold>\<rightarrow> \<chi>) \<^bold>\<rightarrow> (\<phi> \<^bold>\<rightarrow> \<chi>)))(x)" and
+  A2: "((\<phi> \<^bold>& \<psi>) \<^bold>\<rightarrow> \<phi>)(x)" and
+  A3: "((\<phi> \<^bold>\<rightarrow> \<psi>) \<^bold>\<rightarrow> (\<psi> \<^bold>\<rightarrow> \<phi>))(x)" and
+  A4: "((\<phi> \<^bold>& (\<phi> \<^bold>\<rightarrow> \<psi>) \<^bold>\<rightarrow> (\<psi> \<^bold>& (\<psi> \<^bold>\<rightarrow> \<phi>))))(x)" 
+  (*A5a: "(\<phi> \<^bold>\<rightarrow> (\<psi> \<^bold>\<rightarrow> \<chi>)) \<^bold>\<rightarrow> ((\<phi> & \<psi>) \<^bold>\<rightarrow> \<chi>)" and*)
+  (*A5b: "((\<phi> & \<psi>) \<^bold>\<rightarrow> \<chi>) \<^bold>\<rightarrow> (\<phi> \<^bold>\<rightarrow> (\<psi> \<^bold>\<rightarrow> \<chi>))" and*)
+ (* A6: "((\<phi> \<^bold>\<rightarrow> \<psi>) \<^bold>\<rightarrow> \<chi>) \<^bold>\<rightarrow> (((\<psi> \<^bold>\<rightarrow> \<phi>) \<^bold>\<rightarrow> \<chi>) \<^bold>\<rightarrow> \<chi>)" and*)
+ (* A7: "False \<^bold>\<rightarrow> \<phi>"*)
+
+axiomatization where
+  ModusPonens: "(\<phi> \<^bold>\<rightarrow> \<psi>)(x) \<Longrightarrow> (\<phi>(x) \<Longrightarrow>  \<psi>(x))"
+
+lemma True nitpick[satisfy, user_axioms] oops
+
+lemma "(\<phi> \<^bold>\<rightarrow> \<phi>)(x)" sledgehammer
+  using A1 A3 ModusPonens by blast
+
+lemma "True \<^bold>\<rightarrow> \<phi>" sledgehammer nitpick
+
+lemma A6: "((\<phi> \<^bold>\<rightarrow> \<psi>) \<^bold>\<rightarrow> \<chi>) \<^bold>\<rightarrow> (((\<psi> \<^bold>\<rightarrow> \<phi>) \<^bold>\<rightarrow> \<chi>) \<^bold>\<rightarrow> \<chi>)" sledgehammer
+
+lemma A5b: "((\<phi> & \<psi>) \<^bold>\<rightarrow> \<chi>) \<^bold>\<rightarrow> (\<phi> \<^bold>\<rightarrow> (\<psi> \<^bold>\<rightarrow> \<chi>))" sledgehammer
+  by (metis (full_types) A2 A7 ModusPonens)
+
+end

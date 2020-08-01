@@ -1,0 +1,194 @@
+\documentclass[a4paper, 11pt]{article}
+
+%basic
+\usepackage[utf8]{inputenc}
+
+% for handeling citations
+\usepackage[backend=biber, style=numeric, citestyle = numeric]{biblatex}  
+\addbibresource{bibFile.bib} 
+
+%for mathematics
+\usepackage{mathtools}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amssymb}
+
+% Mathematical environments
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{remark}[theorem]{Remark}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem*{observation}{Observation}
+\newtheorem{example}{Example}
+
+% category theory notation
+\newcommand{\cat}{%
+	\mathbf %
+}
+
+\newcommand{\E}[1]{E \, (#1)}
+
+\newcommand{\domain}[ 1 ]{%
+	\mathrm{dom} \, #1 %
+}
+
+\newcommand{\codomain}[ 1 ]{%
+	\mathrm{cod} \, #1%
+}
+
+\newcommand{\notion}[1]{\text{#1 }}
+
+\newcommand{\commSquare}[4]{\notion{commSquare} (#1, \, #2, \, #3, \, #4)}
+
+\newcommand{\product}[5]{\notion{product} (#1, \, #2, \, #3, \, #4, \, #5)}
+\newcommand{\expon}[4]{\notion{exponential} (#1, \, #2, \, #3, \, #4)}
+
+\title{Topos Theory in Free Logic}
+
+\author{Lucca Tiemens}
+
+\begin{document}
+
+\maketitle
+
+Let me start by stating the axioms for a category again for the sake of completeness.
+
+\begin{definition}
+
+	A structure $\cat C = (C, dom, cod, \cdot)$ is called a category if and only if it satisfies the following axioms where $x, y$ and $z \in \cat C$ :
+	\begin{itemize}
+		\item $\E{\domain{x}} \longrightarrow \E{x}$
+		\item $\E{\codomain{y}} \longrightarrow \E{y}$
+		\item $\E{x\cdot y} \longleftrightarrow \domain{x} \simeq \codomain{y}$
+		\item $x \cdot (y \cdot z) \cong (x \cdot y) \cdot z$
+		\item $x \cdot (\domain{x}) \cong x$
+		\item $(\codomain{y} \cdot y) \cong y.$ 
+	\end{itemize}
+
+\end{definition} 
+
+\section{Basic Definitions}
+
+In the following let $\cat C$ always denote a category. We have the convenient abbreviation \emph{type} denoting an \emph{existing} identity arrow.
+
+\begin{definition}[type]
+	$x \in \cat C$ is called a type if and only if \[x \simeq \domain{x}\] 
+\end{definition}
+
+\noindent Furthermore, we adopt notation from category theory for \emph{existing} arrows.
+
+\begin{definition}[existing arrow]
+	For $x,a,b \in \cat C$ writing $x:a \rightarrow b$ abbreviates 
+	\[ \domain{x} \simeq a \wedge \codomain{x} \simeq b \]
+\end{definition}
+
+\noindent For an arrow which does not necessarily exist, we also introduce notation.
+
+\begin{definition}[general arrow]
+	For $x,a,b \in \cat C$ writing $x:a \Rightarrow b$ abbreviates 
+	\[ \domain{x} \cong a \wedge \codomain{x} \cong b \]
+\end{definition}
+
+\noindent A commutative square is easy to write down. The biggest challenge is to remember the order in which the arguments are stated. I have adopted the habit of starting at the lower right corner and then moving counter-clockwise.
+
+\begin{definition}[commutative square]
+	For $f, g, p, q \in \cat C$ we define
+	\[\commSquare{g}{p}{q}{f} \Longleftrightarrow  g \cdot p \cong f \cdot q \]
+\end{definition} 
+
+Note, that we do not explicitly need to say what the domains and codomains are. This can be inferred by using the functions \emph{dom} and \emph{cod}.
+
+At this point I will recall the definition of a product. $p1$ and $p2$ should be thought of as the projection maps. Also note, that $\forall_f$ ($\exists_f$) denotes the \emph{free} universal (existential) quantifier.
+
+\begin{definition}
+	For $a, b, c, p1, p2 \in \cat C$ we define
+	\begin{align*}
+		\product{a}{b}{c}{p1}{p2} \Longleftrightarrow \quad & p1:c\Rightarrow a \wedge p2:x\Rightarrow b \, \wedge \\
+		& \forall_f x f g. \, (f:x\rightarrow a \wedge g:x\rightarrow b) \longrightarrow \\
+		& \exists_f!h. \, (h:x\rightarrow c \wedge f \simeq p1 \cdot h \wedge g \simeq p2 \cdot h)
+	\end{align*}  
+\end{definition}
+
+\section{Category with binary products}
+
+We are now in the position to write down the axioms for a category that has binary products. Taking the product between two elements of a category is defined as a primitive operation. It is defined between types as well as between arrows. Furthermore, the projection arrows are skolemized.
+
+\begin{definition}
+	A category with binary products is a category $\cat C$ together with maps $\otimes: \cat C \times \cat C \to \cat C$, $p1: \cat C \to \cat C$ and $p2: \cat C \to \cat C$ such that 
+	\begin{enumerate}
+		\item $\E{a \otimes b} \longrightarrow \E{a} \wedge \E{b}$
+		\item $\E{p1(a)} \longrightarrow \E{a}$
+		\item $\E{p2 (b)} \longrightarrow \E{b}$
+		\item $\notion{type} a \, \wedge \notion{type} b \, \longrightarrow \product{a}{b}{(a\otimes b)}{(p1(a \otimes b))}{(p2 (a \otimes b))}$
+		\item $\commSquare{a}{p1(\domain{a} \otimes \domain{b})}{a \otimes b}{p1(\codomain{a} \otimes \codomain{b})}$
+		\item $\commSquare{b}{p2(\domain{a} \otimes \domain{b})}{a \otimes b}{p2(\codomain{a} \otimes \codomain{b})}$
+	\end{enumerate}
+\end{definition}
+
+\noindent Axiom 4 makes $a \otimes b$ the product of $a$ and $b$. Axioms 5 and 6 enable us to form the product between arrows as well. Let $a:x\rightarrow y$ and $b:v \rightarrow w$ be arrows, $a\otimes b$ then denotes the unique arrow $<a, b>:x\otimes v \rightarrow y\otimes w$. 
+
+Note, that this definition does not force existence of elements. There are models of only non-existing elements - the easiest one being just one non-existing element. Therefore, we have not excluded the empty category in our axiomatization.
+
+
+\section{Cartesian Category}
+
+The next particular category I want to axiomatize is a Cartesian category. By such a category I mean a category with \emph{binary} products, that has a \emph{final} type as well as \emph{equalizers}. I will define the required notions below.
+A different way to view a Cartesian category is thus a category with all \emph{finite} limits.
+However, I have not formulated the notion of a general limit in our formalism. It seems to me that this will not work well with theorem proving because of the \emph{cone} constructions involved. 
+Do you think we need the general definition for Topos Theory or are we okay with using finite products and equalizers?
+
+Let's get started with the definition of a final type. We did this before, however, there was a small mistake in the original formulation. The correct definition is
+
+\begin{definition}[final type] 
+	Let $z \in \cat C$. We then define
+	\[ \notion{final} z \Longleftrightarrow \forall_f t. \, (\notion{type} t) \longrightarrow (\exists_f!f. \, f:t\rightarrow z)\]
+\end{definition} 
+
+In the earlier definition the condition of $t$ being a type was missing. Without this condition a category with a final type does not have any arrows except identity-arrows.
+
+\begin{definition}[equalizer between two arrows]
+	Let $f, g, e \in \cat C$. Then we define 
+	\begin{align*}
+		\notion{equalizer}(f, g, e) & \Longleftrightarrow f \cdot e \simeq g \cdot e \, \wedge \\
+		& \forall_f z. \, (f \cdot z \simeq g \cdot z) \longrightarrow (\exists_f!u. \, u:\domain{z}\rightarrow\domain{e} \, \wedge \, e \cdot u \simeq z)
+	\end{align*}
+\end{definition}
+
+Note that if $f$ and $g$ are not parallel, i.e. they do not agree on the domain or on the codomain, then $\notion{equalizer}(f,g,e)$ will always be false and hence there is no equalizer.
+
+Now we are in the position to formulate a Cartesian category.
+
+\begin{definition}[Cartesian category]
+	A Cartesian category $ \cat C$ is a category with binary products, maps, called $\doteq \, :\cat C \times \cat C \to \cat C$ and $!_1:\cat C \to \cat C$, and a constant $\boldsymbol{1} \in \cat C$ such that
+	\begin{enumerate}
+		\item $(f:\domain{g} \rightarrow \codomain{g}) \longrightarrow \notion{equalizer}(f, g, (f \doteq g))$
+		\item $\notion{final} \boldsymbol{1}$
+		\item $\notion{type} t \longrightarrow (!_1 \, t):t\rightarrow1$
+		\item $E (!_1 \, t) \longrightarrow \notion{type} t$
+		\item $E (f \doteq g) \longrightarrow f:\domain{g} \rightarrow \codomain{g}$
+	\end{enumerate}
+\end{definition}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
