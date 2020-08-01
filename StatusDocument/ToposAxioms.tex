@@ -45,7 +45,7 @@
 \newcommand{\commSquare}[4]{\notion{commSquare} (#1, \, #2, \, #3, \, #4)}
 
 \newcommand{\product}[5]{\notion{product} (#1, \, #2, \, #3, \, #4, \, #5)}
-\newcommand{\expon}[4]{\notion{exponential} (#1, \, #2, \, #3, \, #4)}
+\newcommand{\expon}[5]{\notion{exponential} (#1, \, #2, \, #3, \, #4, \, #5)}
 
 \title{Topos Theory in Free Logic}
 
@@ -170,6 +170,35 @@ Now we are in the position to formulate a Cartesian category.
 		\item $\notion{type} t \longrightarrow (!_1 \, t):t\rightarrow1$
 		\item $E (!_1 \, t) \longrightarrow \notion{type} t$
 		\item $E (f \doteq g) \longrightarrow f:\domain{g} \rightarrow \codomain{g}$
+	\end{enumerate}
+\end{definition}
+
+\section{Exponential Category}
+
+Now that we have limits, the next construction we need before we can axiomatize a Topos are exponential types. Because we can use the $\otimes$ operation on all arrows, an exponential is defined as usual in the literature, except that we skolemize the transpose map.
+
+\begin{definition}[exponential between types]
+	Let $a, b, c, \epsilon \in \cat C$ where $\cat C$ is a category with binary products. Furthermore, let $tp: \cat C \to \cat C$ be a map. We define
+	\begin{align*}
+		\expon{a}{b}{c}{\epsilon}{tp} & \Longleftrightarrow \epsilon:(a \otimes c) \Rightarrow b \, \wedge \\
+		& \forall_f z \, f. \, (f:(z \otimes a) \rightarrow b \; \longrightarrow \\ 
+		&((tp \, f):z \rightarrow c \, \wedge \, (\epsilon \cdot \domain{a} \otimes (tp \, f)) \simeq f \, \wedge \\
+		& (\forall_f \hat{f}. \, (\hat{f}:z \rightarrow c \, \wedge \, (\epsilon \cdot \domain{a} \otimes \hat{f}) \simeq f) \longrightarrow \hat{f} \simeq (tp \, f))))
+	\end{align*}
+	We call $\epsilon$ the \emph{evaluation map} and $\text{tp}$ the \emph{transpose map}.
+\end{definition}
+
+With this definition in hand we can define an exponential category. By this I mean a category for which we have an exponential between two \emph{types}.
+
+As far as I have seen it is not necessary to enable exponential between \emph{arrows} because we can define the maps between exponential types in terms of ... . Hence we should be able to prove that exponentiation by a type is a functor without further axiomatization.
+
+\begin{definition}[Exponential category]
+	An Exponential category $\cat C$ is a category with binary products and maps that are called $(\bullet)^{\bullet}: \cat C \times \cat C \to \cat C$, $\epsilon: \cat C \times \cat C \to \cat C$ and $\text{tp}: \cat C \to \cat C$ such that
+	\begin{enumerate}
+		\item $\notion{type} a \, \wedge \, \notion{type} b \longrightarrow \expon{a}{b}{b^{a}}{\epsilon}{\text{tp}}$
+		\item $E \, b^{a} \longrightarrow E \, a \, \wedge \, E\, b $
+		\item $E \, \epsilon(a, b) \longrightarrow E \, a \, \wedge \, E \, b$
+		\item $E \, (tp\, a) \longrightarrow E \, a$
 	\end{enumerate}
 \end{definition}
 

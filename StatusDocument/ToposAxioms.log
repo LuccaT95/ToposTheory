@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2019.7.20)  26 JUL 2020 21:20
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2019.7.20)  1 AUG 2020 16:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -520,7 +520,12 @@ Overfull \hbox (6.42868pt too wide) detected at line 158
 []
  []
 
-[3] (./ToposAxioms.aux)
+[3]
+Overfull \hbox (31.89085pt too wide) detected at line 187
+[]
+ []
+
+[4] (./ToposAxioms.aux)
 Package logreq Info: Writing requests to 'ToposAxioms.run.xml'.
 \openout1 = `ToposAxioms.run.xml'.
 
@@ -528,7 +533,7 @@ Package logreq Info: Writing requests to 'ToposAxioms.run.xml'.
 Here is how much of TeX's memory you used:
  9529 strings out of 494587
  162043 string characters out of 6177759
- 570898 words of memory out of 5000000
+ 570904 words of memory out of 5000000
  13049 multiletter control sequences out of 15000+600000
  13853 words of font info for 51 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
@@ -542,11 +547,12 @@ mf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist
 type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
 ublic/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/am
 sfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts
-/cm/cmti10.pfb>
-Output written on ToposAxioms.pdf (3 pages, 120368 bytes).
+/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmt
+i10.pfb>
+Output written on ToposAxioms.pdf (4 pages, 131777 bytes).
 PDF statistics:
- 54 PDF objects out of 1000 (max. 8388607)
- 38 compressed objects within 1 object stream
+ 61 PDF objects out of 1000 (max. 8388607)
+ 43 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
