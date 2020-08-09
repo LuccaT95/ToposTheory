@@ -3,10 +3,6 @@
 %basic
 \usepackage[utf8]{inputenc}
 
-% for handeling citations
-\usepackage[backend=biber, style=numeric, citestyle = numeric]{biblatex}  
-\addbibresource{bibFile.bib} 
-
 %for mathematics
 \usepackage{mathtools}
 \usepackage{amsfonts}
@@ -43,7 +39,7 @@
 \newcommand{\notion}[1]{\text{#1 }}
 
 \newcommand{\commSquare}[4]{\notion{commSquare} (#1, \, #2, \, #3, \, #4)}
-
+\newcommand{\pullback}[4]{\notion{pullback} (#1, \, #2, \, #3, \, #4)}
 \newcommand{\product}[5]{\notion{product} (#1, \, #2, \, #3, \, #4, \, #5)}
 \newcommand{\expon}[5]{\notion{exponential} (#1, \, #2, \, #3, \, #4, \, #5)}
 
@@ -175,30 +171,72 @@ Now we are in the position to formulate a Cartesian category.
 
 \section{Exponential Category}
 
-Now that we have limits, the next construction we need before we can axiomatize a Topos are exponential types. Because we can use the $\otimes$ operation on all arrows, an exponential is defined as usual in the literature, except that we skolemize the transpose map.
+Now that we have limits, the next construction we need, before we can axiomatize a Topos, is that of exponential types. Because we can use the $\otimes$ operation on all arrows, an exponential is defined as usual in the literature, except that we skolemize the transpose map.
 
 \begin{definition}[exponential between types]
 	Let $a, b, c, \epsilon \in \cat C$ where $\cat C$ is a category with binary products. Furthermore, let $tp: \cat C \to \cat C$ be a map. We define
 	\begin{align*}
 		\expon{a}{b}{c}{\epsilon}{tp} & \Longleftrightarrow \epsilon:(a \otimes c) \Rightarrow b \, \wedge \\
-		& \forall_f z \, f. \, (f:(z \otimes a) \rightarrow b \; \longrightarrow \\ 
-		&((tp \, f):z \rightarrow c \, \wedge \, (\epsilon \cdot \domain{a} \otimes (tp \, f)) \simeq f \, \wedge \\
-		& (\forall_f \hat{f}. \, (\hat{f}:z \rightarrow c \, \wedge \, (\epsilon \cdot \domain{a} \otimes \hat{f}) \simeq f) \longrightarrow \hat{f} \simeq (tp \, f))))
+		& \forall_f z \, f. \, (f:(a \otimes z) \rightarrow b \; \longrightarrow \\ 
+		&((tp \, f):z \rightarrow c \, \wedge \, (\epsilon \cdot (a \otimes (tp \, f))) \simeq f \, \wedge \\
+		& (\forall_f \hat{f}. \, (\hat{f}:z \rightarrow c \, \wedge \, (\epsilon \cdot (a \otimes \hat{f})) \simeq f) \longrightarrow \hat{f} \simeq (tp \, f))))
 	\end{align*}
 	We call $\epsilon$ the \emph{evaluation map} and $\text{tp}$ the \emph{transpose map}.
 \end{definition}
 
-With this definition in hand we can define an exponential category. By this I mean a category for which we have an exponential between two \emph{types}.
+With this definition in hand, we can define an Exponential category. By this I mean a Cartesian(!) category for which we have an exponential between two \emph{types}. Note that, contrary to me, some authors do not assume equalizers to exist in an Exponential category.
 
-As far as I have seen it is not necessary to enable exponential between \emph{arrows} because we can define the maps between exponential types in terms of ... . Hence we should be able to prove that exponentiation by a type is a functor without further axiomatization.
 
 \begin{definition}[Exponential category]
-	An Exponential category $\cat C$ is a category with binary products and maps that are called $(\bullet)^{\bullet}: \cat C \times \cat C \to \cat C$, $\epsilon: \cat C \times \cat C \to \cat C$ and $\text{tp}: \cat C \to \cat C$ such that
+	An Exponential category $\cat C$ is a Cartesian category together with maps that are called $(\bullet)^{\bullet}: \cat C \times \cat C \to \cat C$, $\epsilon: \cat C \times \cat C \to \cat C$ and $\text{tp}: \cat C \to \cat C$ such that
 	\begin{enumerate}
-		\item $\notion{type} a \, \wedge \, \notion{type} b \longrightarrow \expon{a}{b}{b^{a}}{\epsilon}{\text{tp}}$
-		\item $E \, b^{a} \longrightarrow E \, a \, \wedge \, E\, b $
-		\item $E \, \epsilon(a, b) \longrightarrow E \, a \, \wedge \, E \, b$
-		\item $E \, (tp\, a) \longrightarrow E \, a$
+		\item $\notion{type} a \, \wedge \, \notion{type} b \longrightarrow \expon{a}{b}{b^{a}}{\epsilon(a , b)}{\text{tp}}$
+		\item $\commSquare{f}{\epsilon(a, \domain{f})}{a \otimes f^{a}}{\epsilon(a, \codomain{f})}$
+		\item $E \, b^{a} \longrightarrow \notion{type} \, a \, \wedge \, E\, b $
+		\item $E \, \epsilon(a, b) \longrightarrow \notion{type} \, a \, \wedge \, E \, b$
+		\item $E \, (tp\, a) \longrightarrow E \, a$.
+	\end{enumerate}
+\end{definition}
+
+The second axiom makes it possible to take the exponential by a type for any arrow. Hence we should be able to prove that exponentiation by a type is a functor - I say should because I have not tried.
+
+\section{Topos}
+
+What is left to define is the sub-object classifier. This definition depends on pullbacks and on monic maps, hence I shall define those first.
+
+\begin{definition}[pullback]
+	Let $f,g,p,q \in \cat C$ where $\cat C$ is a category. A pullback for these four elements is
+	\begin{align*}
+		\pullback{g}{p}{q}{f} \Longleftrightarrow & \; \commSquare{g}{p}{q}{f} \, \wedge \\
+		&(\forall_f \, \beta \, \gamma. \: (f \cdot \beta \simeq g \cdot \gamma) \; \longrightarrow \\
+		&(\exists_f \, \delta. \: q \cdot \delta \simeq \beta \, \wedge \, p \cdot \delta \simeq \gamma)).
+	\end{align*}
+\end{definition}
+
+\begin{definition}
+	Let $m \in \cat C$. We then define
+	\[ \notion{monic} m \Longleftrightarrow \forall_f \,f \, g. \, m \cdot f \simeq m \cdot g \longrightarrow f \simeq g \]
+\end{definition}
+
+Now we are ready for the sub-object classifier.
+
+\begin{definition}[Sub-object classifier]
+	Let $\cat C$ be a Cartesian category. Choose $ \Omega, true \in \cat C$. Furthermore, pick a map $char: \cat C \to \cat C$. A sub-object classifier then is
+	\begin{align*}
+		\notion{sub-obj classifier}&(\Omega, \, true, \, char) \; \Longleftrightarrow \\ 
+		& \forall_f m. \, \notion{monic} m \longrightarrow ((char \, m):\codomain{m} \rightarrow \Omega \, \wedge \\
+		&\pullback{true}{!_1 (\domain{m})}{m}{char \, m} \, \wedge \\
+		& \forall_f \Phi. \, \Phi:\codomain{m} \rightarrow \Omega \, \wedge \\ &\pullback{true}{!_1(\domain{m})}{m}{\Phi} \longrightarrow \Phi \simeq char \, m)
+	\end{align*}
+\end{definition}
+
+All work we have done so far leads us now to the definition of a Topos. Note, that we are assuming a little bit to much. There is a reduced definition for a Topos that does not assume all but only some exponentials to be present. However, for simplicity I am not concerned about this.
+
+\begin{definition}[Topos]
+	Let $\mathcal{E}$ be an Exponential category. $\mathcal{E}$ is a Topos if and only if for fixed elements $\Omega, true \in \mathcal{E}$ ($\Omega$ is called a \emph{sub-object classifier}) and a map $char: \mathcal{E} \to \mathcal{E}$ it holds that
+	\begin{enumerate}
+		\item sub-obj classifier ($\Omega, \, true, \, char$)
+		\item $E \, (char \, m) \longrightarrow E \, m \, \wedge \, \notion{monic} m$
 	\end{enumerate}
 \end{definition}
 

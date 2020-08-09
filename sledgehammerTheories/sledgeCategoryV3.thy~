@@ -1,5 +1,5 @@
 theory sledgeCategoryV3 imports FreeLogic
-
+                                     
 abbrevs "morphismE" = ":\<rightarrow>" and
         "morphism" = ":\<Rightarrow>" and
         "wedgeE" = "\<leftarrow>-()-\<rightarrow>" and
@@ -31,6 +31,8 @@ class category =
         S5: "x\<cdot>(dom x) \<cong> x" and           
         S6: "(cod y)\<cdot>y \<cong> y"
 begin
+
+lemmas catAx = S1 S2 S3 S4 S5 S6
 
 subsection\<open>Basic Definitions\<close>
 
@@ -83,7 +85,7 @@ subsection\<open>More Advanced Definitions\<close>
 
 \<comment> \<open>e is the equalizer for f and g\<close>
 abbreviation isEqualizer::"'a \<Rightarrow> 'a \<Rightarrow> 'a \<Rightarrow> bool" ("Equalizer")
-  where "isEqualizer f g e \<equiv> f \<cdot> e \<cong> g \<cdot> e \<and>
+  where "isEqualizer f g e \<equiv> f \<cdot> e \<simeq> g \<cdot> e \<and>
           (\<^bold>\<forall>z. f \<cdot> z \<simeq> g \<cdot> z \<longrightarrow> (\<^bold>\<exists>!u. u:(dom z)\<rightarrow>(dom e) \<and> e \<cdot> u \<simeq> z))"
 
 (*abbreviation coequalizer*)
@@ -129,69 +131,104 @@ class productCategory = category +
         p1::"'a \<Rightarrow> 'a" and
         p2::"'a \<Rightarrow> 'a"
   assumes 
-          catProd1: "E (a \<^bold>\<times> b) \<longrightarrow> (E a \<and> E b)" and
-          catProd3: "E (p1 a) \<longrightarrow> (E a)" and
-          catProd4: "E (p2 b) \<longrightarrow> (E b)" and
-          catProd2: "typeE a \<and> typeE b \<longrightarrow> product a b (a \<^bold>\<times> b) (p1 (a \<^bold>\<times> b)) (p2 (a \<^bold>\<times> b))" and
-          catProd5: "commSquare a (p1 ((dom a) \<^bold>\<times> (dom b))) (a \<^bold>\<times> b) (p1 ((cod a) \<^bold>\<times> (cod b)))" and
-          catProd6: "commSquare b (p2 ((dom a) \<^bold>\<times> (dom b))) (a \<^bold>\<times> b) (p2 ((cod a) \<^bold>\<times> (cod b)))"
+          prodCat1: "E (a \<^bold>\<times> b) \<longrightarrow> (E a \<and> E b)" and
+          prodCat2: "E (p1 a) \<longrightarrow> (E a)" and
+          prodCat3: "E (p2 b) \<longrightarrow> (E b)" and
+          prodCat4: "typeE a \<and> typeE b \<longrightarrow> product a b (a \<^bold>\<times> b) (p1 (a \<^bold>\<times> b)) (p2 (a \<^bold>\<times> b))" and
+          prodCat5: "commSquare a (p1 ((dom a) \<^bold>\<times> (dom b))) (a \<^bold>\<times> b) (p1 ((cod a) \<^bold>\<times> (cod b)))" and
+          prodCat6: "commSquare b (p2 ((dom a) \<^bold>\<times> (dom b))) (a \<^bold>\<times> b) (p2 ((cod a) \<^bold>\<times> (cod b)))"
 
 begin
 lemma "True" nitpick[satisfy] oops
 lemma "\<exists>x::'a. E x" nitpick[satisfy] oops
 
+lemmas prodCatAx = catAx prodCat1 prodCat2 prodCat3 prodCat4 prodCat5 prodCat6
+lemmas prodCatAxPure = prodCat1 prodCat2 prodCat3 prodCat4 prodCat5 prodCat6
+
 \<comment> \<open>We can decide about the domain of p1 in any case\<close>
 lemma "((dom a) \<^bold>\<times> (dom b)) \<cong> dom (p1 ((dom a) \<^bold>\<times> (dom b)))" 
-  by (metis S1 S3 S5 S6 catProd1 catProd2 catProd3)
+  by (metis S1 S3 S5 S6 prodCat1 prodCat4 prodCat2)
 
-\<comment> \<open>This is not true for the codomain: The reason is that (dom a) might exist even though (dom a \<^bold>\<times> dom b) does not.\<close>
+\<comment> \<open>This is not true for the codomain: The reason is that (dom a) might exist even though (dom a \<times> dom b) does not.\<close>
 lemma "(dom a) \<cong> cod (p1 ((dom a) \<^bold>\<times> (dom b)))" oops
 
 lemma "type A" oops
 
 lemma "(typeE a \<and> typeE b) \<longrightarrow> typeE (a \<^bold>\<times> b)" 
-  by (metis local.S3 local.S5 local.S6 local.catProd2)
+  by (metis local.S3 local.S5 local.S6 local.prodCat4)
 
 lemma "\<^bold>\<forall>a b. typeE a \<and> typeE b \<longrightarrow> (\<^bold>\<exists>p1 p2. product a b (a \<^bold>\<times> b) p1 p2)" (*sledgehammer (S2 S3 S5 catProd2 catProd1 catProd4 catProd3)*)
-  by (smt S2 catProd2)
+  by (smt S2 prodCat4)
 
 end
 
 section\<open>Cartesian Category\<close>
 
 class cartesianCategory = productCategory +
-  fixes finalObject::"'a" ("\<^bold>1") and
+  fixes equalizer::"'a \<Rightarrow> 'a \<Rightarrow> 'a" (infix "\<doteq>" 120) and
+        finalObject::"'a" ("\<^bold>1") and
         finalMap::"'a \<Rightarrow> 'a" ("!\<^sub>1")
   assumes
-        cartesian1: "f:(dom g) \<Rightarrow> (cod g) \<longrightarrow> (\<exists>e. isEqualizer f g e)" and
+        cartesian1: "f:(dom g)\<rightarrow>(cod g) \<longrightarrow> isEqualizer f g (f \<doteq> g)" and
         cartesian2: "final \<^bold>1" and
         cartesian3: "typeE t \<longrightarrow> (!\<^sub>1 t):t\<Rightarrow>\<^bold>1" and
-        cartesian4: "E (!\<^sub>1 t) \<longrightarrow> typeE t"
+        cartesian4: "E (!\<^sub>1 t) \<longrightarrow> typeE t" and
+        cartesian5: "E (f \<doteq> g) \<longrightarrow> f:(dom g)\<rightarrow>(cod g)"
 begin
 lemma "True" nitpick[satisfy] oops
+
+lemmas cartesianAx = prodCatAx cartesian1 cartesian2 cartesian3 cartesian4 cartesian5
+lemmas cartesianAxPure = cartesian1 cartesian2 cartesian3 cartesian4 cartesian5
+
+lemma "(f:(dom g) \<rightarrow> (cod g) \<and> isEqualizer f g e) \<longrightarrow> E e" 
+  using S2 S3 by blast  
+
+lemma "\<not> (E (f \<doteq> g)) \<longrightarrow> \<not> (f:(dom g) \<rightarrow> (cod g))" 
+  using S2 S3 cartesian1 by blast
+
+lemma "typeE t \<longrightarrow> (!\<^sub>1 t):t\<rightarrow>\<^bold>1" 
+  using local.cartesian2 local.cartesian3 by auto
+
+(*lemma "type t" sledgehammer (S1 S2 S3 S4 S5 S6 catProd1 catProd2 catProd3 catProd4 catProd5 catProd6 cartesian1 cartesian2 cartesian3 cartesian4 cartesian5)*)
+
 end
 
 section\<open>Cartesian Closed Category\<close>
 
 abbreviation (in productCategory) isExponential:: "'a \<Rightarrow> 'a \<Rightarrow> 'a \<Rightarrow> 'a \<Rightarrow> ('a \<Rightarrow> 'a) \<Rightarrow> bool" ("Exp")
-  where "Exp a b c \<epsilon> tp \<equiv> \<epsilon>:(a\<^bold>\<times>c)\<Rightarrow>b \<and> (\<^bold>\<forall>z f. f:(z \<^bold>\<times> a)\<rightarrow>b \<longrightarrow>
-                            ((tp f):z\<rightarrow>c) \<and> \<epsilon> \<cdot> ((dom a)\<^bold>\<times>(tp f)) \<simeq> f \<and>
-                              (\<^bold>\<forall>\<ff>. \<ff>:z\<rightarrow>c \<and> \<epsilon> \<cdot> ((dom a)\<^bold>\<times>\<ff>) \<simeq> f \<longrightarrow> \<ff> \<simeq> (tp f)))"
+  where "Exp a b c \<epsilon> tp \<equiv> \<epsilon>:(c\<^bold>\<times>a)\<Rightarrow>b \<and> (\<^bold>\<forall>z f. f:(z \<^bold>\<times> a)\<rightarrow>b \<longrightarrow>
+                            ((tp f):z\<rightarrow>c) \<and> \<epsilon> \<cdot> ((tp f) \<^bold>\<times> a) \<simeq> f \<and>
+                              (\<^bold>\<forall>\<ff>. \<ff>:z\<rightarrow>c \<and> \<epsilon> \<cdot> (\<ff> \<^bold>\<times> a) \<simeq> f \<longrightarrow> \<ff> \<simeq> (tp f)))"
 
-class exponentialCategory = productCategory +
+class exponentialCategory = cartesianCategory +
   fixes  exp::"'a \<Rightarrow> 'a \<Rightarrow> 'a" and
          evaluation::"'a \<Rightarrow> 'a \<Rightarrow> 'a" ("\<epsilon>") and
          tp::"'a \<Rightarrow> 'a" 
 
-  assumes G1: "(typeE a \<and> typeE b) \<longrightarrow> (Exp a b (exp a b) (\<epsilon> a b) tp)" and (*Probably needs to be extended to form functor*)
-          G2: "E (exp a b) \<longrightarrow> E a \<and> E b" and
-          G3: "E (\<epsilon> a b) \<longrightarrow> E a \<and> E b" and
-          G4: "E (tp a) \<longrightarrow> E a"
+  assumes G1: "(typeE a \<and> typeE b) \<longrightarrow> (Exp a b (exp b a) (\<epsilon> a b) tp)" and
+          G2: "commSquare f (\<epsilon> (dom f) a) ((exp f a) \<^bold>\<times> a) (\<epsilon> (cod f) a)" and
+          G3: "E (exp b a) \<longrightarrow> E b \<and> typeE a" and
+          G4: "E (\<epsilon> a b) \<longrightarrow> typeE a \<and> E b" and
+          G5: "E (tp a) \<longrightarrow> E a"
 begin
 lemma "True" nitpick[satisfy] oops
+
+lemmas expCatAx = cartesianAx G1 G2 G3 G4 G5
+lemmas expCatAxPure = G1 G2 G3 G4 G5
+
+(*This helps justifing G2*)
+lemma expArrow: "(commSquare f (\<epsilon> (dom f) a) ((tp (f\<cdot>(\<epsilon> (dom f) a))) \<^bold>\<times> a) (\<epsilon> (cod f) a))"
+  by (smt expCatAx(1) expCatAx(18) expCatAx(19) expCatAx(2) expCatAx(20) expCatAx(22) expCatAx(3) expCatAx(4) expCatAx(6) expCatAx(7))
+
+lemma expArrow2: "\<exists>e. (commSquare f (\<epsilon> (dom f) a) (e \<^bold>\<times> a) (\<epsilon> (cod f) a))" using expArrow by auto
+
+(*proposition "E f \<and> typeE a \<and> E (\<epsilon> a (dom f)) \<and> E (\<epsilon> a (cod f)) \<longrightarrow> (\<^bold>\<exists>!e. (commSquare f (\<epsilon> a (dom f)) (a \<^bold>\<times> e) (\<epsilon> a (cod f))))" sledgehammer(expCatAx expArrow2)
+
+proposition "E f \<and> typeE a \<and> E (\<epsilon> a (dom f)) \<longrightarrow> exp f a \<simeq> (tp (f\<cdot>(\<epsilon> a (dom f))))" *)
+
 end
 
-class topos = cartesianCategory + exponentialCategory +
+class topos = exponentialCategory +
   fixes classifier::'a ("\<Omega>") and
         true::'a ("true") and
         characteristicMap::"'a \<Rightarrow> 'a" ("char") and
@@ -205,16 +242,20 @@ class topos = cartesianCategory + exponentialCategory +
           T4: "E (char m) \<longrightarrow> E m" and
           T5: "E (\<Delta> B) \<longrightarrow> E B"
 begin
+
+lemmas toposAx = expCatAx T1 T2 T3 T4 T5
+lemmas toposAxPure = T1 T2 T3 T4 T5
+
 \<comment> \<open>We do not axiomatize the existence of \<Omega> because one existing morphism leads to the desired behaviour. This way the empty topos is possible.\<close>
 lemma "(\<exists>x::'a. E x) \<longrightarrow> E \<Omega>" (*sledgehammer (S1 S2 S3 S4 S5 S6 catProd1 catProd2 cartesian1 cartesian2 G1 G2 T1)*)
   by (smt S1 S2 S3 S5 S6 T1 cartesian2)
 
 lemma "true:\<^bold>1\<Rightarrow>\<Omega>" (*sledgehammer(S1 S2 S3 S5 S6 T1 cartesian2 cartesian3)*)
-  by (smt S2 S3 S6 T1 cartesian2 cartesian3)
+  by (smt S1 S2 S3 S5 S6 T1 cartesian2 cartesian3)
 
 \<comment> \<open>This justifies our skolemization of \<Delta>\<close>
 lemma "typeE B \<longrightarrow>  (\<^bold>\<exists>!f. ((p1(B\<^bold>\<times>B))\<cdot>f \<simeq>  B \<and> (p2(B\<^bold>\<times>B))\<cdot>f \<simeq> B))" (*sledgehammer (S1 S2 S3 S4 S5 S6 catProd1 catProd2 catProd3 catProd4 catProd5 catProd6 cartesian1 cartesian2 G1 G2 T1 T2 T3 T4 T5)*)
-  by (smt S2 S3 S4 S5 catProd2)
+  by (smt S2 S3 S4 S5 prodCat4)
 
 abbreviation PredicateOfEquality::"'a \<Rightarrow> 'a" ("\<delta>") where
   "\<delta> \<equiv> \<lambda>B. char (\<Delta> B)"

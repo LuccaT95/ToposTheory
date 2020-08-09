@@ -23,8 +23,11 @@ abbreviation ExId (infixr "\<simeq>" 56) (* Existing identity *)
    where "x \<simeq> y \<equiv> E x \<and> E y \<and> x = y"
 
 lemma fallI [intro]: "\<^bold>\<forall>x. \<phi> x" if "\<And>x. E x \<longrightarrow> \<phi> x" using that by simp
-lemma fexI [intro]: "\<^bold>\<exists>x. \<phi> x" if "E x \<and> \<phi> x" using that by auto
+lemma fexI [intro]: "E x \<and> \<phi> x \<Longrightarrow> \<^bold>\<exists>x::'a. \<phi> x" by auto
 lemma fexE [elim]: "(\<And>x. (E x \<and> \<phi> x) \<Longrightarrow> C) \<Longrightarrow> C" if "\<^bold>\<exists>x. \<phi> x" using that by auto
+
+lemma fall3I: "(\<And>x y z. E x \<and> E y \<and> E z \<Longrightarrow> \<phi> x y z) \<Longrightarrow> (\<^bold>\<forall>x y z. \<phi> x y z)" for \<phi>::"'a \<Rightarrow> 'a \<Rightarrow> 'a \<Rightarrow> bool"
+  by simp
 
 lemma equE: assumes "A \<Longrightarrow> B" and "B \<Longrightarrow> A" shows "A \<longleftrightarrow> B"
   using assms(1) assms(2) by blast

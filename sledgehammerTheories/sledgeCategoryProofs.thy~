@@ -1,4 +1,4 @@
-theory sledgeCategoryProofs imports sledgeCategoryV2
+theory sledgeCategoryProofs imports sledgeCategoryV3
 
 begin
 
@@ -29,8 +29,8 @@ lemma WeakerInitial1: "(\<^bold>\<forall>t. (type t) \<longrightarrow> (\<exists
 lemma WeakerInitial2: "(initial z) \<longrightarrow> (\<^bold>\<forall>t. (type t) \<longrightarrow> (\<exists>!f. dom f \<cong> z \<and> cod f \<cong> t))"
   by (metis S1) 
 
-lemma InitialsAreIsomorphic: "initial z \<and> initial y \<longrightarrow> z \<^bold>\<cong> y" 
-  by (smt S3 S4 S5 S6)
+lemma InitialsAreIsomorphic: "initial z \<and> initial y \<longrightarrow> z \<^bold>\<cong> y"
+  by (smt catAx(1) catAx(2) catAx(3) catAx(4) catAx(5) catAx(6))
 
 lemma InitialIsUnique: "\<forall>z. \<forall>f. initial z \<and> (dom f \<cong> z \<and> cod f \<cong> z) \<longrightarrow> z \<cong> f" (*sledgehammer(S1 S2 S3 S4 S5 S6) sledgehammer [remote_leo3](S1 S2 S3 S4 S5 S6)*)
   by (smt S3 S5 S6)
@@ -53,13 +53,13 @@ lemma "monic m \<and> epi m \<longrightarrow> isomorphism m" nitpick oops
 
   subsection\<open>About products\<close>
 
-lemma productIso: "((product a b c q1 q2) \<and> (product a b d q1 q2)) \<longrightarrow> c \<^bold>\<cong> d"   
+lemma productIso: "product a b c t1 t2 \<and> product a b d q1 q2 \<longrightarrow> c \<^bold>\<cong> d"   
    by (smt S1 S2 S4 S3 S5 S6)                     
 
 lemma productSym: "((product b a c q1 q2) \<longrightarrow>  (product a b c q2 q1))"  
   by smt
 
-lemma productUnit: "\<^bold>\<forall>u a. final (u) \<and> typeE a \<longrightarrow> (\<^bold>\<exists>p1 p2. product u a a p1 p2)"
+lemma productUnit: "final (u) \<and> typeE a \<longrightarrow> (\<^bold>\<exists>p1 p2. product u a a p1 p2)"
   by (smt S3 S4 S5 S6)
 
 \<comment> \<open>This enables us to generally define the product for all morphisms\<close>
@@ -67,13 +67,30 @@ lemma "\<^bold>\<forall>a b c p1 p2 q1 q2. (product  (dom a) (dom b) c p1 p2) \<
                       (\<^bold>\<exists>!f. (commSquareE a p1 f q1 \<and> commSquareE b p2 f q2))" 
   by (smt S3 S4 S5 S6)
 
+(*nitpick finds counterexample*)
+lemma mapToInitial: "(initial z \<and> (\<^bold>\<exists>f. f:A\<rightarrow>z)) \<longrightarrow> initial A" nitpick oops
+
 end
 
 section\<open>Category with binary products\<close>
 context productCategory begin
 
-(*proposition prodFunc: "isFunctor \<^bold>\<times>"*)
+proposition "final (u) \<and> typeE A \<longrightarrow> (u \<^bold>\<times> A) \<^bold>\<cong> A"
+proof
+  assume assm: "final (u) \<and> typeE A" 
+  then have "\<^bold>\<exists>p1 p2. product u A A p1 p2" using productUnit by auto
+  then obtain q1::'a and q2::'a  where prodAssm: "product u A A q1 q2" using assm by smt
 
+  have "typeE u \<and> typeE A" using assm
+    by (metis catAx(3) catAx(6))
+  then have "product u A (u \<^bold>\<times> A) (p1 (u \<^bold>\<times> A)) (p2 (u \<^bold>\<times> A)) \<and> product u A A q1 q2" using prodCat4 prodAssm by auto
+  thus "(u \<^bold>\<times> A) \<^bold>\<cong> A" using productIso[of "(p1 (u \<^bold>\<times> A))" "(u \<^bold>\<times> A)" u "(p2 (u \<^bold>\<times> A))" A q1 A q2 ] by (rule rev_mp)
+qed
+
+proposition "(A \<^bold>\<times> B) \<^bold>\<cong> (B \<^bold>\<times> A)" oops
+
+lemma domP1: "E (f \<cdot> (p1 (a \<^bold>\<times> b))) \<and> type a \<and> type b \<Longrightarrow> dom (f\<cdot>(p1 (a \<^bold>\<times> b))) \<simeq> (a \<^bold>\<times> b)"
+  by (smt prodCatAx(10) prodCatAx(2) prodCatAx(3) prodCatAx(4) prodCatAx(5) prodCatAx(7) prodCatAx(8))
 end
 
 
@@ -82,40 +99,77 @@ section\<open>Proofs in Cartesian Categories\<close>
 
 context cartesianCategory begin
 
-lemmas axiomSetCartesian = S1 S2 S3 S4 S5 S6 catProd1 catProd2 catProd3 catProd4 catProd5 catProd6 
-                          cartesian1 cartesian2
-
 subsection\<open>Pullbacks\<close>
 
-\<comment> \<open>z3 finds proof but it cannot be performed\<close>
-proposition pastingLemma: "pullback g p t f \<and> pullback t q s h \<and> commSquare g (p\<cdot>q) s (f\<cdot>h) \<longrightarrow> pullback g (p\<cdot>q) s (f\<cdot>h)" oops (*sledgehammer(S1 S2 S3 S4 S5 S6) sledgehammer[remote_leo3] (S1 S2 S3 S4 S5 S6)*)
+\<comment> \<open>z3 finds proof\<close>
+proposition pastingLemma: "pullback g p t f \<and> pullback t q s h \<and> commSquare g (p\<cdot>q) s (f\<cdot>h) \<longrightarrow> pullback g (p\<cdot>q) s (f\<cdot>h)" (*sledgehammer(S1 S2 S3 S4 S5 S6) sledgehammer[remote_leo3] (S1 S2 S3 S4 S5 S6)*)
+  by (smt cartesianAx(1) cartesianAx(2) cartesianAx(3) cartesianAx(4) cartesianAx(5) cartesianAx(6)) 
 
-lemma productUnit2: "\<^bold>\<forall>x a. (initial x \<and> type a) \<longrightarrow> (\<^bold>\<exists>p2. product x a x (dom x) p2)" (*sledgehammer(axiomSetCartesian(11) axiomSetCartesian(12) axiomSetCartesian(13) axiomSetCartesian(14) axiomSetCartesian(3) axiomSetCartesian(5) axiomSetCartesian(6) axiomSetCartesian(8)) sledgehammer[remote_leo3] (axiomSetCartesian)*)
-  (*by (smt axiomSetCartesian(11) axiomSetCartesian(12) axiomSetCartesian(13) axiomSetCartesian(14) axiomSetCartesian(3) axiomSetCartesian(5) axiomSetCartesian(6) axiomSetCartesian(8)) *)
-  sorry
-
-lemma "typeE A \<and> typeE \<^bold>1\<^sub>c \<longrightarrow> (\<^bold>1\<^sub>c \<^bold>\<times> A) \<cong> A" oops
-(*proof 
-  consider (a) "E A" | (b) "\<not> (E A)" by auto
-  then have "(\<^bold>1\<^sub>c \<^bold>\<times> A) \<^bold>\<cong> A"
-  proof cases
-    case a
-    then have "E \<^bold>1\<^sub>c \<and> E A" 
-      by (metis S1 S3 S6 cartesian2)
-    then show "(\<^bold>1\<^sub>c \<^bold>\<times> A) \<^bold>\<cong> A"
-      by (metis S1 S2 S3 S4 S5 S6 cartesian1 cartesian2 catProd1 catProd2) \<comment> \<open>Takes a few seconds\<close>
-  next
-    case b
-    then show ?thesis 
-      by (metis S1 S2 S3 catProd1) *)
+lemma "typeE A \<and> initial z \<longrightarrow> ((z \<^bold>\<times> A) \<^bold>\<cong> A)" 
+proof 
+  assume assm: "typeE A \<and> initial z"
+  then obtain f::'a where 1:"f:z\<rightarrow>A \<and> (\<^bold>\<forall>g. g:z\<rightarrow>A \<longrightarrow> g \<simeq> f)" by force
+  have "product z A z z f"
+    apply(rule conjI)
+     apply (metis 1 local.S2 local.S3 local.S5 local.S6)
+    apply(rule conjI)
+     apply (metis 1)
+  proof (rule fall3I, rule impI)
+    fix x::'a and v::'a and w::'a
+    assume "E x \<and> E v \<and> E w" and "z\<leftarrow>v- x -w\<rightarrow>A"
+    show "\<^bold>\<exists>!h. h:x\<rightarrow>z \<and> v \<simeq> z\<cdot>h \<and> w \<simeq> f\<cdot>h" oops
+    
 end
 
 section\<open>Proofs in Cartesian Closed Categories\<close>
 
 context exponentialCategory begin
 
-\<comment> \<open>Feeding this set to sledgehammer will avoid including facts from Isabelle Main\<close>
-lemmas axiomSet = S1 S2 S3 S4 S5 S6 catProd1 catProd2 catProd3 catProd4 catProd5 catProd6  E1 E2 E3
+lemma prodWithInitial: "initial z \<and> typeE A \<longrightarrow> initial (z \<^bold>\<times> A)"
+proof
+  assume assm: "initial z \<and> typeE A"
+  show "initial (z \<^bold>\<times> A)"
+    apply(rule fallI, intro impI)
+  proof -
+    fix x assume 1: "E x" and 2: "type x"
+    then have "\<exists>!f. E f \<and> f:z\<rightarrow>x" using assm by blast
+    then obtain f where 3: "E f \<and> f:z\<rightarrow>x \<and> (\<forall>g. E g \<and> g:z\<rightarrow>x \<longrightarrow> g = f)" by auto
+    show "(\<^bold>\<exists>!f. f:(z \<^bold>\<times> A)\<rightarrow>x)"
+      apply(rule fexI[of "f\<cdot>(p1(z \<^bold>\<times> A))"], rule conjI)
+      apply (metis "3" assm prodCatAx(10) prodCatAx(3) prodCatAx(5) prodCatAx(6), rule conjI, rule conjI, rule domP1)
+        apply (metis "3" assm prodCatAx(10) prodCatAx(3) prodCatAx(5) prodCatAx(6))
+       apply (metis "3" assm prodCatAx(10) prodCatAx(3) prodCatAx(4) prodCatAx(5) prodCatAx(6)) 
+    proof (rule fallI, rule impI, rule impI)
+      fix g assume 6:"E g" and 7:"g:(z \<^bold>\<times> A)\<rightarrow>x"
+      then have 4:"(tp g):z\<rightarrow>(exp x A)"
+        by (metis "2" assm expCatAx(18))
+      have 5: "(f \<cdot> p1 (z \<^bold>\<times> A)):(z \<^bold>\<times> A)\<rightarrow>x"
+        apply(rule conjI, rule domP1)
+        apply (metis "3" assm prodCatAx(10) prodCatAx(3) prodCatAx(5) prodCatAx(6))
+        by (metis "3" assm prodCatAx(10) prodCatAx(3) prodCatAx(4) prodCatAx(5) prodCatAx(6)) 
+      moreover have "(tp (f\<cdot>(p1 (z \<^bold>\<times> A)))):z\<rightarrow>(exp x A)"
+        by (metis "5" assm expCatAx(18) expCatAx(2) expCatAx(3) expCatAx(6))
+      then have 8:"(tp (f\<cdot>(p1 (z \<^bold>\<times> A)))) = (tp g)" using 4
+        by (metis assm catAx(1) catAx(3) catAx(6))
+      have 9:"(\<epsilon> A x) \<cdot> ((tp g) \<^bold>\<times> A) \<simeq> g"
+        by (metis "2" "6" "7" assm expCatAxPure(1))
+      have 10:"(\<epsilon> A x) \<cdot> ((tp (f\<cdot>(p1 (z \<^bold>\<times> A)))) \<^bold>\<times> A) \<simeq> f\<cdot>(p1 (z \<^bold>\<times> A))"
+        by (metis "2" "5" assm catAx(1) expCatAxPure(1))
+      have "(\<epsilon> A x) \<cdot> ((tp (f\<cdot>(p1 (z \<^bold>\<times> A)))) \<^bold>\<times> A) \<simeq> g" using 8 9 by auto
+      thus "g = f\<cdot>(p1 (z \<^bold>\<times> A))" using 10
+        by blast
+    qed
+  qed
+qed
+
+lemma "initial z \<and> typeE A \<longrightarrow> ((z \<^bold>\<times> A) \<^bold>\<cong> z)"
+proof (rule impI)
+  assume assm: "initial z \<and> typeE A"
+  then have 1: "initial (z \<^bold>\<times> A)" using prodWithInitial by auto
+  from assm have "initial z" by simp
+  thus "(z \<^bold>\<times> A) \<^bold>\<cong> z" using InitialsAreIsomorphic 1 by auto 
+qed
+
 
 (*lemma "(type A \<and> type B \<and> type C) \<longrightarrow> ((A \<^bold>\<times> B)\<^sup>C) \<cong> ((A\<^sup>C) \<^bold>\<times> (B\<^sup>C))" sledgehammer(axiomSet)
  
@@ -129,12 +183,6 @@ lemma "(type A \<and> type B \<and> type C) \<longrightarrow> ((B\<^sup>A)\<^sup
 lemma "\<^bold>\<forall>A. type A \<longrightarrow> (exp A \<^bold>1\<^sub>c) \<simeq> \<^bold>1\<^sub>c"  (*sledgehammer(axiomSet) sledgehammer [remote_leo3](axiomSet)*)
   by (smt axiomSet(12) axiomSet(13) axiomSet(15)) *)
 
-end
-
-context exponentialCategory2 begin
-\<comment> \<open>leo3 finds proof but timeout using metis\<close>
-(*lemma "\<exists>x. final x" (*sledgehammer[remote_leo3](S1 S2 S3 S4 S5 S6 catProd1 catProd2 G1 G2 productAssoc)*)
- by (metis G1 G2 S1 S2 S3 S4 S5 S6 catProd1 catProd2)*)
 end
 
 section\<open>Proofs about Functors\<close>
@@ -156,8 +204,6 @@ proposition "\<^bold>\<forall>A. isFunctor (\<lambda>x. (x\<^sup>A))"
 section\<open>Topos\<close>
 
 context topos begin
-lemmas axiomSetTopos = S1 S2 S3 S4 S5 S6 catProd1 catProd2 catProd3 catProd4 catProd5 catProd6 
-                          cartesian1 cartesian2 cartesian3 G1 G2 T1 T2 T3 T4 T5
 
 proposition DiagonalMapIsMonic: "monic (\<Delta> B)" (*sledgehammer(axiomSetTopos)*)
   by (smt axiomSetTopos(1) axiomSetTopos(19) axiomSetTopos(22) axiomSetTopos(3) axiomSetTopos(4) axiomSetTopos(5) axiomSetTopos(6)) 
