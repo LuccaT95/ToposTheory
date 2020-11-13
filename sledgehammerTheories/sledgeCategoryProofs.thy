@@ -53,7 +53,7 @@ lemma "monic m \<and> epi m \<longrightarrow> isomorphism m" nitpick oops
 
   subsection\<open>About products\<close>
 
-lemma productIso: "product a b c t1 t2 \<and> product a b d q1 q2 \<longrightarrow> c \<^bold>\<cong> d"   
+lemma productIso: "product a b c t1 t2 \<and> product a b d q1 q2 \<longrightarrow> c \<^bold>\<cong> d"  
    by (smt S1 S2 S4 S3 S5 S6)                     
 
 lemma productSym: "((product b a c q1 q2) \<longrightarrow>  (product a b c q2 q1))"  
@@ -116,7 +116,7 @@ context cartesianCategory begin
 subsection\<open>Pullbacks\<close>
 
 \<comment> \<open>z3 finds proof\<close>
-proposition pastingLemma: "pullback g p t f \<and> pullback t q s h \<and> commSquare g (p\<cdot>q) s (f\<cdot>h) \<longrightarrow> pullback g (p\<cdot>q) s (f\<cdot>h)" (*sledgehammer(S1 S2 S3 S4 S5 S6) sledgehammer[remote_leo3] (S1 S2 S3 S4 S5 S6)*)
+proposition pastingLemma: "pullback g p t f \<and> pullback t q s h \<and> commSquare g (p\<cdot>q) s (f\<cdot>h) \<longrightarrow> pullback g (p\<cdot>q) s (f\<cdot>h)"  (*sledgehammer(S1 S2 S3 S4 S5 S6) sledgehammer[remote_leo3] (S1 S2 S3 S4 S5 S6)*)
   by (smt cartesianAx(1) cartesianAx(2) cartesianAx(3) cartesianAx(4) cartesianAx(5) cartesianAx(6)) 
 
 lemma "typeE A \<and> initial z \<longrightarrow> ((z \<^bold>\<times> A) \<^bold>\<cong> A)" 

@@ -75,7 +75,7 @@ end
 section\<open>Category with binary products\<close>
 context productCategory begin
 
-proposition "final (u) \<and> typeE A \<longrightarrow> (u \<^bold>\<times> A) \<^bold>\<cong> A"
+proposition prodWithFinal: "final (u) \<and> typeE A \<longrightarrow> (u \<^bold>\<times> A) \<^bold>\<cong> A"
 proof
   assume assm: "final (u) \<and> typeE A" 
   then have "\<^bold>\<exists>p1 p2. product u A A p1 p2" using productUnit by auto
@@ -87,8 +87,22 @@ proof
   thus "(u \<^bold>\<times> A) \<^bold>\<cong> A" using productIso[of "(p1 (u \<^bold>\<times> A))" "(u \<^bold>\<times> A)" u "(p2 (u \<^bold>\<times> A))" A q1 A q2 ] by (rule rev_mp)
 qed
 
-proposition "(A \<^bold>\<times> B) \<^bold>\<cong> (B \<^bold>\<times> A)" oops
+(* z3 finds proof but timeout*)
+proposition SymOfProduct: "typeE A \<and> typeE B \<longrightarrow> (A \<^bold>\<times> B) \<^bold>\<cong> (B \<^bold>\<times> A)"
+proof (rule impI)
+  assume assm: "typeE A \<and> typeE B"
+  have "product A B (A \<^bold>\<times> B) (p1 (A \<^bold>\<times> B)) (p2 (A \<^bold>\<times> B))" using prodCat4 assm by auto
+  then have 1:"product B A (A \<^bold>\<times> B) (p2 (A \<^bold>\<times> B)) (p1 (A \<^bold>\<times> B))" by (rule productSym[THEN impE])
+  have "product B A (B \<^bold>\<times> A) (p1 (B \<^bold>\<times> A)) (p2 (B \<^bold>\<times> A))" using prodCat4 assm by auto
+  thus "(A \<^bold>\<times> B) \<^bold>\<cong> (B \<^bold>\<times> A)" 
+    using 1 productIso[where ?a = B and ?b = A and ?c = "(A \<^bold>\<times> B)" and ?d = "(B \<^bold>\<times> A)" and 
+                            ?t1.0 = "(p2 (A \<^bold>\<times> B))" and ?t2.0 = "(p1 (A \<^bold>\<times> B))" and ?q1.0 = "(p1 (B \<^bold>\<times> A))"
+                            and ?q2.0 = "(p2 (B \<^bold>\<times> A))"] by auto
+qed
 
+proposition AssocOfProduct: "typeE A \<and> typeE B \<and> typeE C \<longrightarrow> ((A \<^bold>\<times> B) \<^bold>\<times> C) \<^bold>\<cong> (A \<^bold>\<times> (B \<^bold>\<times> C))" oops
+
+(*Rule which is used in prodWithInitial*)
 lemma domP1: "E (f \<cdot> (p1 (a \<^bold>\<times> b))) \<and> type a \<and> type b \<Longrightarrow> dom (f\<cdot>(p1 (a \<^bold>\<times> b))) \<simeq> (a \<^bold>\<times> b)"
   by (smt prodCatAx(10) prodCatAx(2) prodCatAx(3) prodCatAx(4) prodCatAx(5) prodCatAx(7) prodCatAx(8))
 end
@@ -138,7 +152,7 @@ proof
       apply(rule fexI[of "f\<cdot>(p1(z \<^bold>\<times> A))"], rule conjI)
       apply (metis "3" assm prodCatAx(10) prodCatAx(3) prodCatAx(5) prodCatAx(6), rule conjI, rule conjI, rule domP1)
         apply (metis "3" assm prodCatAx(10) prodCatAx(3) prodCatAx(5) prodCatAx(6))
-       apply (metis "3" assm prodCatAx(10) prodCatAx(3) prodCatAx(4) prodCatAx(5) prodCatAx(6)) 
+       apply (metis "3" assm prodCatAx(10) prodCatAx(3) prodCatAx(4) prodCatAx(5) prodCatAx(6))
     proof (rule fallI, rule impI, rule impI)
       fix g assume 6:"E g" and 7:"g:(z \<^bold>\<times> A)\<rightarrow>x"
       then have 4:"(tp g):z\<rightarrow>(exp x A)"

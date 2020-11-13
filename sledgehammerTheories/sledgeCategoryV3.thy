@@ -127,6 +127,41 @@ abbreviation isNaturalTransformation::"('c \<Rightarrow> 'd) \<Rightarrow> ('c \
   where "natTrans F G \<upsilon> \<equiv> isFunctor F \<and> isFunctor G \<and> 
                               (\<^bold>\<forall>f::'c. (\<upsilon> (cod f))\<cdot>(F f) \<simeq> (G f)\<cdot>(\<upsilon> (dom f)))"
 
+section\<open>The product of two categories\<close>
+
+(*axiomatization where productExistence1: "E (x::'a::category\<times>'b::category) \<longleftrightarrow> E (fst x) \<and> E (snd x)"
+lemma "True" nitpick[satisfy] oops
+
+instantiation prod :: (category, category) category
+begin
+
+lift_definition domain_prod::"'a\<times>'b \<Rightarrow> 'a\<times>'b" is 
+  "\<lambda>x. (dom (fst x), dom (snd x))" done
+
+lift_definition codomain_prod::"'a\<times>'b \<Rightarrow> 'a\<times>'b" is
+  "\<lambda>x. (cod (fst x), cod (snd x))" done
+
+lift_definition composition_prod::"'a\<times>'b \<Rightarrow> 'a\<times>'b \<Rightarrow> 'a\<times>'b" is
+  "\<lambda>x y. ((fst x) \<cdot> (fst y), (snd x) \<cdot> (snd y))" done
+
+instance 
+proof
+  show "\<And>x::'a \<times> 'b. E (dom x) \<longrightarrow> E x" 
+    by (simp add: S1 domain_prod.abs_eq productExistence1)
+  show "\<And>y::'a \<times> 'b. E (cod y) \<longrightarrow> E y" 
+    by (simp add: S2 codomain_prod.rep_eq productExistence1)
+  show "\<And>(x::'a \<times> 'b) y::'a \<times> 'b. E (x \<cdot> y) \<longleftrightarrow> dom x \<simeq> cod y" 
+    by (smt S3 codomain_prod.transfer domain_prod.transfer eq_snd_iff fst_conv productExistence1 sledgeCategoryV3.composition_prod.transfer)
+  show "\<And>(x::'a \<times> 'b) (y::'a \<times> 'b) z::'a \<times> 'b. x \<cdot> (y \<cdot> z) \<cong> (x \<cdot> y) \<cdot> z" 
+    by (smt S4 composition_prod.rep_eq fstI productExistence1 sndI)
+  show "\<And>x::'a \<times> 'b. x \<cdot> (dom x) \<cong> x" 
+    by (simp add: S5 domain_prod.abs_eq productExistence1 sledgeCategoryV3.composition_prod.abs_eq)
+  show "\<And>y::'a \<times> 'b. (cod y) \<cdot> y \<cong> y"
+    by (simp add: S6 codomain_prod.rep_eq composition_prod.rep_eq productExistence1)
+qed
+
+end*)
+
 section\<open>Category with Binary Products\<close>
 
 class productCategory = category +
